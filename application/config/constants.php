@@ -89,3 +89,6 @@ $host     = $_SERVER['HTTP_HOST'] ?? '';
 $script   = $_SERVER['SCRIPT_NAME'] ?? '';
 $path     = rtrim(str_replace(basename($script), '', $script), '/');
 defined('BASEURL') or define('BASEURL', $protocol . '://' . $host . $path . '/');
+
+defined("PHP_MAILER_EMAIL_ID") or define("PHP_MAILER_EMAIL_ID", 'rituraj995kumar@gmail.com');
+defined("PHP_MAILER_PASSWORD") or define("PHP_MAILER_PASSWORD", 'rrpshprvfmtnllzb');

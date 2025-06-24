@@ -39,34 +39,35 @@ class Send_otp_model extends CI_Model
      */
     public function send_otp($email, $otp)
     {
-        // This is a placeholder. In a real application, you would integrate
-        // with an email sending library (e.g., PHPMailer, CI Email Library)
-        // or an SMS gateway API.
-
-        $mail = new PHPMailer(true); // Enable exceptions
-
+        $mail = new PHPMailer(true);
         try {
-            // Server settings
+            // SMTP configuration
             $mail->isSMTP();
-            $mail->Host       = 'smtp.gmail.com';         // Set the SMTP server
+            $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'your_email@gmail.com';   // Your Gmail address
-            $mail->Password   = 'your_app_password';      // App Password from Gmail
-            $mail->SMTPSecure = 'tls';
-            $mail->Port       = 587;
+            $mail->Username   = PHP_MAILER_EMAIL_ID;
+            $mail->Password   = PHP_MAILER_PASSWORD;
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port       = 465;
 
-            // Recipients
-            $mail->setFrom('your_email@gmail.com', 'Your Name');
-            $mail->addAddress('recipient@example.com', 'Recipient Name');
+            // Sender and Receiver
+            $mail->setFrom(PHP_MAILER_EMAIL_ID, 'Rituraj Kumar');
+            $mail->addAddress($email, 'My 2nd Account');
 
-            // Content
+            // Email body
             $mail->isHTML(true);
-            $mail->Subject = 'Test Mail from PHPMailer';
-            $mail->Body    = 'This is a <b>test email</b> sent using PHPMailer with SMTP.';
-            $mail->AltBody = 'This is a test email sent using PHPMailer with SMTP.';
+            $mail->Subject = '✅ Test Email from Localhost (CI3)';
+            $mail->Body    = "
+                <h2>Hello from Rituraj!</h2>
+                <p>Otp For login is $otp</p>
+            ";
+            $mail->AltBody = "
+                <h2>Hello from Rituraj!</h2>
+                <p>Otp For login is $otp</p>
+            ";
 
             $mail->send();
-            echo '✅ Message has been sent';
+            echo "✅ Message has been sent successfully to $email";
         } catch (Exception $e) {
             echo "❌ Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
