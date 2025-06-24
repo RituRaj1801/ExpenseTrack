@@ -61,10 +61,13 @@
 <script>
     $('#sign_up').submit(function(e) {
         e.preventDefault();
+        const fdata = new FormData($(this)[0]);
         $.ajax({
             url: $(this).attr('action'),
-            type: 'post',
-            data: $(this).serialize(),
+            type: 'POST',
+            data: fdata,
+            contentType: false, 
+            processData: false, 
             success: function(response) {
                 let res = JSON.parse(response);
                 // Clear old errors
