@@ -10,6 +10,7 @@ use PHPMailer\PHPMailer\Exception;
 
 class Otp extends CI_Controller
 {
+
     public function __construct()
     {
         parent::__construct();
@@ -17,7 +18,6 @@ class Otp extends CI_Controller
     public function send_otp()
     {
         $mail = new PHPMailer(true);
-
         try {
             // SMTP configuration
             $mail->isSMTP();
