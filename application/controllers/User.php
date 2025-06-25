@@ -5,7 +5,7 @@ class User extends CI_Controller
 {
     public function __construct()
     {
-        parent::__construct(); 
+        parent::__construct();
     }
 
     // function create_user() - This is commented out and not causing the error
@@ -51,26 +51,25 @@ class User extends CI_Controller
             $email    = $this->input->post('email', true);
             $phone    = $this->input->post('phone', true);
             $password = $this->input->post('password', true);
+            $eData = $this->db->select('id')->where('user_email', $email)->get('users')->row();
+            if (!$eData) {
+                $this->load->model("Send_otp_model");
+                $otp = $this->Send_otp_model->generate_numeric_password();
+                $this->Send_otp_model->send_otp($email, $otp);
 
-            // The error points to this line, indicating an issue during Send_otp_model loading/initialization
-            $this->load->model("Send_otp_model");
+                $session_data = [
+                    'username' => $username,
+                    'email'    => $email,
+                    'phone'    => $phone,
+                    'password' => $password,
+                    'otp'      => $otp
+                ];
+                $session_id = md5(json_encode($session_data));
 
-            // Uncomment these lines when you want to use OTP functionality
-            $otp = $this->Send_otp_model->generate_numeric_password();
-            $this->Send_otp_model->send_otp($email, $otp);
+                set_cookie('session_id', $session_id, time() + 300);
 
-            $session_data = [
-                'username' => $username,
-                'email'    => $email,
-                'phone'    => $phone,
-                'password' => $password,
-                'otp'      => $otp 
-            ];
-            $session_id = md5(json_encode($session_data));
-
-            set_cookie('session_id', $session_id, time() + 300); 
-
-            $RES = ['status' => true, 'status_code' => 200, 'message' => 'Session Set Successfully'];
+                $RES = ['status' => true, 'status_code' => 200, 'message' => 'Session Set Successfully'];
+            } else $RES['message'] = 'Email Already Exists';
             echo json_encode($RES);
             exit();
         } else {
