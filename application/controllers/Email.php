@@ -8,7 +8,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 
-class Otp extends CI_Controller
+class Enail extends CI_Controller
 {
 
     public function __construct()
@@ -49,6 +49,6 @@ class Otp extends CI_Controller
         }
     }
     function generate_numeric_password() {
-    echo  rand(100000, 999999);
+   
 }
 }

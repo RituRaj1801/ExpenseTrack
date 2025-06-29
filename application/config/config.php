@@ -330,7 +330,12 @@ $config['cache_query_string'] = FALSE;
 | https://codeigniter.com/user_guide/libraries/encryption.html
 |
 */
-$config['encryption_key'] = '';
+$config['encryption_key'] = 'de1f76dsdsd6d2461sdsdssdsddcerw hrjwene626f52f09003f79dsds#wfssdssfff9a4'; // use a secure 32+ char string
+$config['encryption_driver'] = 'openssl';
+$config['encryption'] = [
+    'cipher' => 'aes-256',
+    'mode' => 'cbc',
+];
 
 /*
 |--------------------------------------------------------------------------
