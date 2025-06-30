@@ -3,19 +3,17 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class User extends CI_Controller
 {
-    public  $db; // 👈 Add this line
-    public Email_model $Email_model;
-
     private $EMAIL_REGEX = "/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/";
     private $STRONG_PASSWORD_REGEX = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/";
     private $PHONE_REGEX = "/^[6-9][0-9]{9}$/";
-
-
+    public Email_model $Email_model;
+    public $encryption;
     public function __construct()
     {
         parent::__construct();
     }
 
+    /* CREATE USER ID */
     function get_user_id($user_name)
     {
         $prefix = "USR";
@@ -24,7 +22,123 @@ class User extends CI_Controller
         $numbers = rand(100, 999);
         return $prefix . $timestamp . $numbers . $lastChar;
     }
+    /* CREATE USER ID */
 
+
+    /* SEND LOGIN OTP */
+    public function send_login_otp()
+    {
+        $input_data = get_all_input_data();
+
+        $username = ($input_data['username'] ?? '');
+        $email = ($input_data['email'] ?? '');
+        $phone = ($input_data['phone'] ?? '');
+        $password = ($input_data['password'] ?? '');
+        $confirm_password = ($input_data['confirm_password'] ?? '');
+        $gender = ($input_data['gender'] ?? '');
+
+        $errors = [];
+
+        if ($username == '') $errors['username'] = "Full name is required.";
+        if (empty($email)) $errors['email'] = "Email is required.";
+        elseif (!preg_match($this->EMAIL_REGEX, $email)) $errors['email'] = "Please Provide a valid email address.";
+        if (empty($phone)) $errors['phone'] = "Phone number is required.";
+        elseif (!preg_match($this->PHONE_REGEX, $phone)) $errors['phone'] = "Please Provide a valid phone number.";
+
+        if (empty($password)) $errors['password'] = "Password is required.";
+        elseif (!preg_match($this->STRONG_PASSWORD_REGEX, $password)) $errors['password'] = "Please Provide a strong password.";
+
+        if (empty($confirm_password)) $errors['confirm_password'] = "Confirm password is required.";
+        elseif ($password !== $confirm_password) {
+            $errors['confirm_password'] = "Passwords do not match.";
+        }
+
+        // Gender validation
+        if (empty($gender)) {
+        } elseif (!in_array($gender, ['male', 'female'])) {
+            $errors[] = "Please select a valid gender.";
+        }
+        if (empty($errors)) {
+            $this->load->model("Email_model");
+            if ($email !== "test@me.com")
+                $checkUser = $this->Email_model->get_user_details(["user_email" => $email]);
+            if ($email === "test@me.com" || !$checkUser['status']) {
+                if ($email === "test@me.com") $otp = 123456;
+                else
+                    $otp = rand(100000, 999999);
+                $params = [
+                    "template_id" => "login_otp",
+                    "email" => $email,
+                    "data" => [
+                        "otp" => $otp,
+                        "user_name" => $username
+                    ]
+                ];
+                if ($email !== "test@me.com")
+                    $MAIL_RES = $this->Email_model->send_otp($params);
+                if ($email === "test@me.com" || $MAIL_RES['status'] == true) {
+                    $session_data_array = [
+                        "username" => $username,
+                        "email" => $email,
+                        "phone" => $phone,
+                        "password" => $password,
+                        "gender" => $gender,
+                        "otp" => $otp,
+                        "ip_address" => $_SERVER['REMOTE_ADDR'],
+                        "expiry" => time() + 300
+                    ];
+                    $session_data_raw = json_encode($session_data_array);
+                    if ($session_data_raw !== null) {
+                        $encrypted_session_data = $this->encryption->encrypt($session_data_raw);
+                        $this->input->set_cookie([
+                            'name'   => 'session_id',
+                            'value'  => $encrypted_session_data,
+                            'expire' => 300, // 5 minutes
+                            'path'   => '/',
+                            'secure' => false, // only send on HTTPS
+                            'httponly' => true, // not accessible via JavaScript
+                            'samesite' => 'Lax' // or 'Strict'
+                        ]);
+                        $RES = [
+                            "status" => true,
+                            "status_code" => 200,
+                            "message" => "Otp Send Successfully",
+                            "data" => $encrypted_session_data
+                        ];
+                    } else $RES = [
+                        "status" => false,
+                        "status_code" => 500,
+                        "message" => "We are facing some issue. Please try again later."
+                    ];
+                } else {
+                    $RES = [
+                        "status" => false,
+                        "status_code" => 422,
+                        "message" => "Error Sending Otp",
+                        "data" => $MAIL_RES
+                    ];
+                }
+            } else {
+                $RES = [
+                    "status" => false,
+                    "status_code" => 422,
+                    "message" => "Email Already Exists"
+                ];
+            }
+        } else {
+            $RES = [
+                'status' => false,
+                "status_code" => 422,
+                'message' => 'Validation Failed',
+                'errors' => $errors
+            ];
+        }
+        echo json_encode($RES);
+        exit();
+    }
+    /* SEND LOGIN OTP */
+
+    /* VERFIRY LOGIN OTP */
     public function user_register()
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -95,22 +209,9 @@ class User extends CI_Controller
                                 'created_at' => date('Y-m-d H:i:s'),
                             ];
 
-                            if (!$session_data['email'] === "test@me.com")
+                            if ($session_data['email'] !== "test@me.com")
                                 $inserted = $this->db->insert('users', $data);
                             if ($session_data['email'] === "test@me.com" || $inserted) {
-                                unset($data['password']);
-                                unset($data['created_at']);
-                                $session_id = json_encode($data);
-                                $session_data = $this->encryption->encrypt($session_id);
-                                $this->input->set_cookie([
-                                    'name'   => 'session_id',
-                                    'value'  => $session_data,
-                                    'expire' => 60 * 60 * 24 * 365,
-                                    'path'   => '/',
-                                    'secure' => false, // only send on HTTPS
-                                    'httponly' => true, // not accessible via JavaScript
-                                    'samesite' => 'Lax' // or 'Strict'
-                                ]);
                                 $RES = [
                                     'status' => true,
                                     'status_code' => 201,
@@ -133,129 +234,79 @@ class User extends CI_Controller
             $this->load->view('pages/user/signup_form');
         }
     }
+    /* VERFIRY LOGIN OTP */
+
+
+    /* LOGIN FORM */
     public function user_login()
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $RES = ["status" => false, "status_code" => 400, "message" => ""];
+            $RES = ['status' => false, 'status_code' => 400, 'message' => ''];
+            $email = trim($this->input->post('user_email'));
+            $password = trim($this->input->post('password'));
 
-            $input_data = get_all_input_data();
+            // Validate email
+            if (empty($email)) {
+                $RES['message'] = "Email is required.";
+            } elseif (!preg_match($this->EMAIL_REGEX, $email)) {
+                $RES['message'] = "Invalid email format.";
+            }
+
+            // Validate password
+            if (empty($password)) {
+                $RES['message'] = "Password is required.";
+            } elseif (!preg_match($this->STRONG_PASSWORD_REGEX, $password)) {
+                $RES['message'] = "Password must be strong (1 upper, 1 lower, 1 number, 1 symbol).";
+            }
+
+            // Stop if any errors
+            if (!empty($RES['message'])) {
+                echo json_encode($RES);
+                return;
+            }
+
+            // Check DB
+            $this->load->model("Email_model");
+            $user = $this->Email_model->get_user_details(['user_email' => $email]);
+            if ($user['status'] === true) {
+                if (password_verify($password, $user['data']['password'])) {  // Use password_verify() if hashed
+                    $RES = ['status' => true, 'status_code' => 200, 'message' => '✅ Login successful.',];
+                    $session_data_array = [
+                        "user_id" => $user['data']['user_id'],
+                        "username" => $user['data']['user_name'],
+                        "email" => $user['data']['user_email'],
+                        "phone" => $user['data']['user_phone'],
+                        "ip_address" => $_SERVER['REMOTE_ADDR'],
+
+                    ];
+                    $session_data_raw = json_encode($session_data_array);
+                    $encrypted_session_data = $this->encryption->encrypt($session_data_raw);
+                    $this->input->set_cookie([
+                        'name'   => 'session_id',
+                        'value'  => $encrypted_session_data,
+                        'expire' => 60*60*24*365, // 5 minutes
+                        'path'   => '/',
+                        'secure' => false, // only send on HTTPS
+                        'httponly' => true, // not accessible via JavaScript
+                        'samesite' => 'Lax' // or 'Strict'
+                    ]);
+                } else $RES['message'] = "Incorrect password.";
+            } else $RES['message'] = "Email not found.";
+
+
             echo json_encode($RES);
             exit();
         }
-        setcookie('session_id', '', time() - 3600, '/');
         $this->load->view('pages/user/login_form');
     }
-    public function send_login_otp()
-    {
-        $input_data = get_all_input_data();
+    /* LOGIN FORM */
 
-        $username = ($input_data['username'] ?? '');
-        $email = ($input_data['email'] ?? '');
-        $phone = ($input_data['phone'] ?? '');
-        $password = ($input_data['password'] ?? '');
-        $confirm_password = ($input_data['confirm_password'] ?? '');
-        $gender = ($input_data['gender'] ?? '');
-
-        $errors = [];
-
-        if ($username == '') $errors['username'] = "Full name is required.";
-        if (empty($email)) $errors['email'] = "Email is required.";
-        elseif (!preg_match($this->EMAIL_REGEX, $email)) $errors['email'] = "Please Provide a valid email address.";
-        if (empty($phone)) $errors['phone'] = "Phone number is required.";
-        elseif (!preg_match($this->PHONE_REGEX, $phone)) $errors['phone'] = "Please Provide a valid phone number.";
-
-        if (empty($password)) $errors['password'] = "Password is required.";
-        elseif (!preg_match($this->STRONG_PASSWORD_REGEX, $password)) $errors['password'] = "Please Provide a strong password.";
-
-        if (empty($confirm_password)) $errors['confirm_password'] = "Confirm password is required.";
-        elseif ($password !== $confirm_password) {
-            $errors['confirm_password'] = "Passwords do not match.";
-        }
-
-        // Gender validation
-        if (empty($gender)) {
-        } elseif (!in_array($gender, ['male', 'female'])) {
-            $errors[] = "Please select a valid gender.";
-        }
-        if (empty($errors)) {
-            $this->load->model("Email_model");
-            if (!$email === "test@me.com")
-                $checkUser = $this->Email_model->get_user_details(["user_email" => $email]);
-            if ($email === "test@me.com" || !$checkUser['status']) {
-                $otp = rand(100000, 999999);
-                $params = [
-                    "template_id" => "login_otp",
-                    "email" => $email,
-                    "data" => [
-                        "otp" => $otp,
-                        "user_name" => $username
-                    ]
-                ];
-                if (!$email === "test@me.com")
-                    $MAIL_RES = $this->Email_model->send_otp($params);
-                if ($email === "test@me.com" || $MAIL_RES['status'] == true) {
-                    $session_data = [
-                        "username" => $username,
-                        "email" => $email,
-                        "phone" => $phone,
-                        "password" => $password,
-                        "gender" => $gender,
-                        "otp" => $otp,
-                        "ip_address" => $_SERVER['REMOTE_ADDR'],
-                        "expiry" => time() + 300
-                    ];
-                    $session_data = json_encode($session_data);
-                    if ($session_data !== null) {
-                        $encrypted_session_data = $this->encryption->encrypt($session_data);
-                        $this->input->set_cookie([
-                            'name'   => 'session_id',
-                            'value'  => $encrypted_session_data,
-                            'expire' => 300, // 5 minutes
-                            'path'   => '/',
-                            'secure' => false, // only send on HTTPS
-                            'httponly' => true, // not accessible via JavaScript
-                            'samesite' => 'Lax' // or 'Strict'
-                        ]);
-                        $RES = [
-                            "status" => true,
-                            "status_code" => 200,
-                            "message" => "Otp Send Successfully",
-                            "data" => $encrypted_session_data
-                        ];
-                    } else $RES = [
-                        "status" => false,
-                        "status_code" => 500,
-                        "message" => "We are facing some issue. Please try again later."
-                    ];
-                } else {
-                    $RES = [
-                        "status" => false,
-                        "status_code" => 422,
-                        "message" => "Error Sending Otp",
-                        "data" => $MAIL_RES
-                    ];
-                }
-            } else {
-                $RES = [
-                    "status" => false,
-                    "status_code" => 422,
-                    "message" => "Email Already Exists"
-                ];
-            }
-        } else {
-            $RES = [
-                'status' => false,
-                "status_code" => 422,
-                'message' => 'Validation Failed',
-                'errors' => $errors
-            ];
-        }
-        echo json_encode($RES);
-        exit();
-    }
 
     public function homepage()
     {
-        $this->load->view('pages/user/homepage');
+        if(isset($_COOKIE['session_id']) && !empty($_COOKIE['session_id'])) {
+            
+            $this->load->view('pages/user/homepage');
+        }else redirect('login')
     }
 }

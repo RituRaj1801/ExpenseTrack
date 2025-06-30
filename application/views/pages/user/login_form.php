@@ -2,8 +2,9 @@
 <html lang="en">
 
 <head>
-    <? $this->load->view('includes/head'); ?>
     <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
@@ -227,7 +228,6 @@
         }
     </style>
 </head>
-<? $this->load->view('includes/foot'); ?>
 
 <body>
     <section class="container">
@@ -236,18 +236,18 @@
             <div class="form-container">
                 <img src="https://raw.githubusercontent.com/hicodersofficial/glassmorphism-login-form/master/assets/illustration.png" alt="illustration" class="illustration" />
                 <h1 class="opacity">LOGIN</h1>
-                <form id="login_form" action="<?=site_url('user/user_login');?>" novalidate>
-                    <input  value="rituraj995kumar@gmail.com" name="user_email" type="email" placeholder="EMAIL" />
+                <form id="login_form" action="<?= site_url('user/user_login'); ?>" novalidate>
+                    <input  name="user_email" type="email" placeholder="EMAIL" />
                     <small id="email_error" style="color: red; display: none;"></small>
 
-                    <input value="Ritu@2016" name="password" type="password" placeholder="PASSWORD" />
+                    <input  name="password" type="password" placeholder="PASSWORD" />
                     <small id="password_error" style="color: red; display: none;"></small>
-
-                    <button class="opacity" type="submit">SUBMIT</button>
+                    <div id="response_msg" class="alert "></div>
+                    <button class="opacity" type="submit">Login</button>
                 </form>
 
                 <div class="register-forget opacity">
-                    <a href="">REGISTER</a>
+                    <a href="<?= site_url('signup') ?>">REGISTER</a>
                     <a href="">FORGOT PASSWORD</a>
                 </div>
             </div>
@@ -256,8 +256,10 @@
         <div class="theme-btn-container"></div>
     </section>
 </body>
-<? $this->load->view('includes/foot'); ?>
+<?php $this->load->view('includes/foot') ?>
 <script>
+    const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
+
     const themes = [{
             background: "#1A1A2E",
             color: "#FFFFFF",
@@ -338,8 +340,8 @@
             if (password === '') {
                 $('#password_error').text('Password is required').show();
                 valid = false;
-            } else if (password.length < 6) {
-                $('#password_error').text('Password must be at least 6 characters').show();
+            } else if (!STRONG_PASSWORD_REGEX.test(password)) {
+                $('#error_password').text('Password must be strong');
                 valid = false;
             }
 
@@ -349,10 +351,13 @@
                 const fData = new FormData($(this)[0]);
                 submit_form_data_ajax(url, fData, function(response) {
                     let res = JSON.parse(response);
-                    console.log(res);
-                    //    if(res.status==true){
-                    //        window.location.href=res.redirect;
-                    //    }
+                    $('#response_msg').html(res.message)
+                    if (res.status == true) {
+                        $('#response_msg').addClass('alert-success').removeClass('alert-danger').fadeIn();
+                        setTimeout(() => {
+                            window.location.href = "<?= site_url('homepage'); ?>"
+                        }, 3000);
+                    } else $('#response_msg').addClass('alert-danger').removeClass('alert-success').fadeIn();
                 });
             }
         });

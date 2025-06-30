@@ -147,6 +147,10 @@
         </div>
       </div>
     </form>
+    <div class="text-center mt-3">
+      <span>Already have an account?</span>
+      <a href="<?= site_url('login'); ?>" class="text-primary fw-semibold">Login</a>
+    </div>
   </div>
 
   <script>
@@ -276,15 +280,17 @@
         processData: false,
         contentType: false,
         dataType: 'json',
-      success: function(response) {
+        success: function(response) {
           const msgBox = $('#response_msg');
           msgBox.removeClass('alert-danger alert-success d-none').html('');
 
           if (response.status === true) {
             msgBox.addClass('alert alert-success')
-              .html(response.message || 'Registration validated successfully!')
+              .html(response.message || 'Registration successfully!. Please login to continue.')
               .fadeIn();
-              window.location.href = "<?= site_url('user/homepage'); ?>";
+            setTimeout(() => {
+              window.location.href = "<?= site_url('login'); ?>";
+            }, 3000);
           } else {
             msgBox.addClass('alert alert-danger')
               .html(response.message || 'Something went wrong.')
