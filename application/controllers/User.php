@@ -30,151 +30,141 @@ class User extends CI_Controller
     {
         $input_data = get_all_input_data();
         $RES = ['status' => false, 'status_code' => 400, 'message' => ''];
-        if (isset($input_data['email']) && !empty($input_data['email'])) {
-            $email = $input_data['email'];
+
+        if (!empty($input_data['email'])) {
+            $email = trim($input_data['email']);
+
             if (preg_match($this->EMAIL_REGEX, $email)) {
                 $this->load->model("Email_model");
                 $checkUser = $this->Email_model->get_user_details(["user_email" => $email]);
-                if (!$checkUser['status']) {
+
+                // Check if user already exists
+                if ($checkUser['status'] === false) {
                     $otp = rand(100000, 999999);
+
                     $params = [
                         "template_id" => "login_otp",
                         "email" => $email,
-                        "data" => [
-                            "otp" => $otp,
-                        ]
+                        "data" => ["otp" => $otp]
                     ];
                     $MAIL_RES = $this->Email_model->send_otp($params);
-                    if ($MAIL_RES['status'] == true) {
+
+                    if ($MAIL_RES['status'] === true) {
                         $session_data_array = [
-                            "email" => $email,
-                            "otp" => $otp,
-                            "ip_address" => $_SERVER['REMOTE_ADDR'],
-                            "expiry" => time() + 300
+                            "email"       => $email,
+                            "otp"         => $otp,
+                            "ip_address"  => $_SERVER['REMOTE_ADDR'],
+                            "user_agent"  => $_SERVER['HTTP_USER_AGENT'],
+                            "expiry"      => time() + 300 // 5 minutes
                         ];
+
                         $session_data_raw = json_encode($session_data_array);
                         $encrypted_session_data = $this->encryption->encrypt($session_data_raw);
+
                         $this->input->set_cookie([
-                            'name'   => 'session_id',
-                            'value'  => $encrypted_session_data,
-                            'expire' => 300, // 5 minutes
-                            'path'   => '/',
-                            'secure' => false, // only send on HTTPS
-                            'httponly' => true, // not accessible via JavaScript
-                            'samesite' => 'Lax' // or 'Strict'
+                            'name'     => 'session_id',
+                            'value'    => $encrypted_session_data,
+                            'expire'   => 300,
+                            'path'     => '/',
+                            'secure'   => false,
+                            'httponly' => true,
+                            'samesite' => 'Lax'
                         ]);
+
                         $RES = [
-                            "status" => true,
-                            "status_code" => 200,
-                            "message" => "Otp Send Successfully",
-                            "data" => $encrypted_session_data
+                            "status"       => true,
+                            "status_code"  => 200,
+                            "message"      => "OTP sent successfully.",
+                            "data"         => $encrypted_session_data
                         ];
                     } else {
                         $RES = [
-                            "status" => false,
+                            "status"      => false,
                             "status_code" => 422,
-                            "message" => "Failed to send otp. Please try again later.",
-                            "data" => $MAIL_RES
+                            "message"     => "Failed to send OTP. Please try again.",
+                            "data"        => $MAIL_RES
                         ];
                     }
                 } else {
                     $RES = [
-                        "status" => false,
+                        "status"      => false,
                         "status_code" => 422,
-                        "message" => "Account already exists with this email address. Please login.",
+                        "message"     => "Account already exists with this email. Please login."
                     ];
                 }
-            } else $RES['message'] = "Please Provide a valid email address.";
-        } else $RES['message'] = "Email is required.";
+            } else {
+                $RES['message'] = "Invalid email format.";
+            }
+        } else {
+            $RES['message'] = "Email is required.";
+        }
+
         echo json_encode($RES);
         exit();
     }
+
     /* SEND LOGIN OTP */
 
     /* VERFIRY LOGIN OTP */
     public function user_register()
     {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $RES = ['status' => false, 'status_code' => 400, 'message' => ''];
+            $errors = [];
 
             $input_data = get_all_input_data();
+            $encrypted_cookie = $input_data['session_id'] ?? $_COOKIE['session_id'] ?? '';
 
-            if ((isset($_COOKIE['session_id']) && $_COOKIE['session_id'] != '') || isset($input_data['session_id']) && $input_data['session_id'] != '') {
-                if ((isset($_COOKIE['session_id']) && $_COOKIE['session_id'] != ''))
-                    $encrypted_cookie = $_COOKIE['session_id'];
-                else $encrypted_cookie = $input_data['session_id'];
-
-                // Try to decrypt the cookie
+            if ($encrypted_cookie !== '') {
                 $decrypted = $this->encryption->decrypt($encrypted_cookie);
 
                 if ($decrypted) {
                     $session_data = json_decode($decrypted, true);
+
+                    // Session validation
                     if (json_last_error() !== JSON_ERROR_NONE || empty($session_data)) {
-                        $RES = [
-                            'status' => false,
-                            'status_code' => 400,
-                            'message' => 'Invalid session data.'
-                        ];
+                        $RES['message'] = 'Invalid session data.';
                     } elseif (time() > $session_data['expiry']) {
-                        $RES = [
-                            'status' => false,
-                            'status_code' => 401,
-                            'message' => 'Session expired. Please request a new OTP.'
-                        ];
-                    } elseif (!isset($session_data['ip_address']) || $session_data['ip_address'] !== $_SERVER['REMOTE_ADDR']) {
-                        $RES = [
-                            'status' => false,
-                            'status_code' => 403,
-                            'message' => 'Session expired. Please request a new OTP.'
-                        ];
+                        $RES['message'] = 'Session expired. Please request a new OTP.';
+                    } elseif ($session_data['ip_address'] !== $_SERVER['REMOTE_ADDR']) {
+                        $RES['message'] = 'IP address mismatch.';
+                    } elseif ($session_data['user_agent'] !== $_SERVER['HTTP_USER_AGENT']) {
+                        $RES['message'] = 'User agent mismatch.';
                     } else {
-                        $username          = isset($input_data['username']) ? trim($input_data['username']) : '';
-                        $email             = isset($input_data['email']) ? trim($input_data['email']) : '';
-                        $phone             = isset($input_data['phone']) ? trim($input_data['phone']) : '';
-                        $password          = isset($input_data['password']) ? trim($input_data['password']) : '';
-                        $confirm_password  = isset($input_data['confirm_password']) ? trim($input_data['confirm_password']) : '';
-                        $otp               = isset($input_data['otp']) ? trim($input_data['otp']) : '';
-                        $gender            = isset($input_data['gender']) ? trim($input_data['gender']) : '';
-                        // Validations
-                        if ($username === '') {
-                            $errors['username'] = 'Full Name is required';
+                        // Session is valid, proceed to form validation
+                        $username         = trim($input_data['username'] ?? '');
+                        $email            = trim($input_data['email'] ?? '');
+                        $phone            = trim($input_data['phone'] ?? '');
+                        $password         = trim($input_data['password'] ?? '');
+                        $confirm_password = trim($input_data['confirm_password'] ?? '');
+                        $otp              = trim($input_data['otp'] ?? '');
+                        $gender           = trim($input_data['gender'] ?? '');
+
+                        if ($username === '') $errors['username'] = 'Full Name is required.';
+                        if (!preg_match('/^[6-9]\d{9}$/', $phone)) $errors['phone'] = 'Valid 10-digit Indian phone number required.';
+                        if (strlen($password) < 6) $errors['password'] = 'Password must be at least 6 characters.';
+                        if ($password !== $confirm_password) $errors['confirm_password'] = 'Passwords do not match.';
+                        if (!ctype_digit($otp) || strlen($otp) !== 6) $errors['otp'] = 'OTP must be a 6-digit number.';
+                        if (!in_array($gender, ['male', 'female'])) $errors['gender'] = 'Gender must be male or female.';
+                        if ($email !== $session_data['email']) $errors['email'] = 'Email does not match session.';
+
+                        if ((int)$otp !== (int)$session_data['otp']) {
+                            $errors['otp'] = 'Incorrect OTP.';
                         }
 
-                        if ($phone === '' || !preg_match('/^[6-9]\d{9}$/', $phone)) {
-                            $errors['phone'] = 'A valid 10-digit Indian phone number is required';
-                        }
-                        if ($password === '' || strlen($password) < 6) {
-                            $errors['password'] = 'Password must be at least 6 characters';
-                        }
-
-                        if ($confirm_password === '' || $password !== $confirm_password) {
-                            $errors['confirm_password'] = 'Passwords do not match';
-                        }
-
-                        if ($otp === '' || strlen($otp) !== 6 || !ctype_digit($otp)) {
-                            $errors['otp'] = 'OTP must be a 6-digit number';
-                        }
-
-                        if ($gender === '' && in_array($gender, ['male', 'female'])) {
-                            $errors['gender'] = 'Invalid gender';
-                        }
-                        if (!isset($session_data['email']) || $email != $session_data['email']) {
-                            $errors['email'] = 'Gmail id has been changed.';
-                        }
-                        // Final response
+                        // Final result
                         if (!empty($errors)) {
                             $RES = [
-                                'status' => false,
+                                'status'      => false,
                                 'status_code' => 422,
-                                'message' => 'Validation failed',
-                                'errors' => $errors
+                                'message'     => 'Validation failed',
+                                'errors'      => $errors
                             ];
                         } else {
-                            // Passed validation — proceed to insert
                             $user_id = $this->get_user_id($username);
                             $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-                            $data = [
+                            $user_data = [
                                 'user_id'    => $user_id,
                                 'user_name'  => $username,
                                 'user_phone' => $phone,
@@ -184,31 +174,35 @@ class User extends CI_Controller
                                 'created_at' => date('Y-m-d H:i:s'),
                             ];
 
-
-                            $inserted = $this->db->insert('users', $data);
-                            if ($inserted) {
+                            if ($this->db->insert('users', $user_data)) {
                                 $RES = [
-                                    'status' => true,
+                                    'status'      => true,
                                     'status_code' => 201,
-                                    'message' => '✅ Registration successful.'
+                                    'message'     => '✅ Registration successful.'
                                 ];
                             } else {
                                 $RES = [
-                                    'status' => false,
+                                    'status'      => false,
                                     'status_code' => 500,
-                                    'message' => 'Something went wrong while saving user.'
+                                    'message'     => 'Failed to save user. Please try again.'
                                 ];
                             }
                         }
                     }
-                } else $RES['message'] = "Session has been expired. Please request a new OTP.";
-            } else $RES['message'] = 'Please request for OTP before register.';
+                } else {
+                    $RES['message'] = 'Invalid session. Please request a new OTP.';
+                }
+            } else {
+                $RES['message'] = 'Missing session. Please request OTP first.';
+            }
+
             echo json_encode($RES);
             exit();
         } else {
             $this->load->view('pages/user/signup_form');
         }
     }
+
     /* VERFIRY LOGIN OTP */
 
 
@@ -230,8 +224,6 @@ class User extends CI_Controller
             // Validate password
             if (empty($password)) {
                 $RES['message'] = "Password is required.";
-            } elseif (!preg_match($this->STRONG_PASSWORD_REGEX, $password)) {
-                $RES['message'] = "Password must be strong (1 upper, 1 lower, 1 number, 1 symbol).";
             }
 
             // Stop if any errors
@@ -267,7 +259,6 @@ class User extends CI_Controller
                     ]);
                 } else $RES['message'] = "Incorrect password.";
             } else $RES['message'] = "Email not found.";
-
 
             echo json_encode($RES);
             exit();

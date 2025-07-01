@@ -62,33 +62,33 @@
       <div class="row g-3">
         <div class="col-md-6">
           <label for="username" class="form-label">Full Name</label>
-          <input type="text" id="username" name="username" class="form-control" required>
+          <input type="text" id="username" name="username" class="form-control" required placeholder="Enter your full name">
           <div id="error_username" class="error-msg"></div>
         </div>
         <div class="col-md-6">
           <label for="email" class="form-label">Email</label>
-          <input type="email" id="email" name="email" class="form-control" required>
+          <input type="email" id="email" name="email" class="form-control" required placeholder="Enter your email address">
           <div id="error_email" class="error-msg"></div>
         </div>
         <div class="col-md-6">
           <label for="phone" class="form-label">Phone</label>
-          <input type="number" id="phone" name="phone" class="form-control" required>
+          <input type="number" id="phone" name="phone" class="form-control" required placeholder="Enter 10-digit mobile number">
           <div id="error_phone" class="error-msg"></div>
         </div>
         <div class="col-md-6">
           <label for="password_field" class="form-label">Password</label>
-          <input type="password" id="password_field" name="password" class="form-control" required>
+          <input type="password" id="password_field" name="password" class="form-control" required placeholder="Create a password">
           <div id="error_password" class="error-msg"></div>
         </div>
         <div class="col-md-6">
           <label for="confirm_password" class="form-label">Confirm Password</label>
-          <input type="text" id="confirm_password" name="confirm_password" class="form-control" required>
+          <input type="text" id="confirm_password" name="confirm_password" class="form-control" required placeholder="Re-enter your password">
           <div id="error_confirm_password" class="error-msg"></div>
         </div>
         <div class="col-md-6">
           <label for="otp" class="form-label">Enter OTP</label>
           <div class="input-group">
-            <input type="text" id="otp" name="otp" class="form-control" required>
+            <input type="text" id="otp" name="otp" class="form-control" required placeholder="Enter the OTP">
             <button type="button" class="btn btn-outline-primary" onclick="validateFormForOtp()">Send OTP</button>
           </div>
           <div id="error_otp" class="error-msg"></div>
@@ -110,6 +110,7 @@
         </div>
       </div>
     </form>
+
   </div>
   <?php $this->load->view('includes/foot'); ?>
   <script>
@@ -166,16 +167,22 @@
       return valid;
     }
 
-    function handleResponse(response) {
+    function handleResponse(status, message) {
+      console.log(status, message);
       const msgBox = $('#response_msg');
+
       msgBox.removeClass('d-none alert-success alert-danger').html('');
-      if (response.status === true) {
-        msgBox.addClass('alert alert-success').html(response.message);
+
+      if (status === true) {
+        msgBox.addClass('alert alert-success').html(message);
       } else {
-        msgBox.addClass('alert alert-danger').html(response.message || 'Something went wrong');
+        msgBox.addClass('alert alert-danger').html(message || 'Something went wrong');
       }
-      setTimeout(() => msgBox.fadeOut(), 5000);
+      msgBox.show(); // Ensure the box is visible
+
+      setTimeout(() => msgBox.fadeOut(), 4000); // Then fade it out
     }
+
 
     function validateFormForOtp() {
       const email = $('#email').val().trim();
@@ -190,7 +197,7 @@
       fData.append('email', email);
       submit_form_data_ajax(url, fData, function(data) {
         const response = JSON.parse(data)
-        handleResponse(response);
+        handleResponse(response.status, response.message);
         if (response.status) USER_REQUESTED_FOR_OTP = true;
       });
     }
@@ -216,7 +223,7 @@
       const url = window.location.href;
       const fData = new FormData($('#sign_up')[0]);
       submit_form_data_ajax(url, fData, function(data) {
-        var response = JSON.parse(response);
+        var response = JSON.parse(data);
         // Show field-specific errors BEFORE calling handleResponse
         if (response.status === false && response.errors) {
           $.each(response.errors, function(field, msg) {
@@ -229,7 +236,7 @@
         }
 
         // Call your existing handleResponse as-is
-        handleResponse(response);
+        handleResponse(response.status, response.message);
 
         // Redirect if successful
         if (response.status === true) {
