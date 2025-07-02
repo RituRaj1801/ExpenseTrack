@@ -2,92 +2,252 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Signup Form</title>
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Signup Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #71b7e6, #9b59b6);
+      font-family: 'Poppins', sans-serif;
+      padding: 30px 10px;
+    }
+
+    .container {
+      max-width: 700px;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-title {
+      font-size: 26px;
+      font-weight: 600;
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    .form-title::after {
+      content: "";
+      width: 40px;
+      height: 4px;
+      background: linear-gradient(135deg, #71b7e6, #9b59b6);
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      border-radius: 5px;
+    }
+
+    .error-msg {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 4px;
+      display: block;
+    }
+
+    #response_msg {
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+  </style>
 </head>
 
-<body class="bg-light">
-
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow rounded-4">
-                    <div class="card-header bg-primary text-white text-center">
-                        <h4 class="mb-0">Signup</h4>
-                    </div>
-                    <div class="card-body p-4">
-
-
-                        <form method="post" action="<?= current_url() ?>" id="sign_up">
-                            <div class="mb-3">
-                                <label class="form-label">Full Name</label>
-                                <input type="text" name="username" class="form-control" required>
-                                <div class="text-danger error-msg" id="error_username"></div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Email Address</label>
-                                <input type="email" name="email" class="form-control" required autocomplete="off">
-                                <div class="text-danger error-msg" id="error_email"></div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Phone Number (optional)</label>
-                                <input type="text" name="phone" class="form-control">
-                                <div class="text-danger error-msg" id="error_phone"></div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Password</label>
-                                <input type="password" name="password" class="form-control" required>
-                                <div class="text-danger error-msg" id="error_password"></div>
-                            </div>
-
-
-                            <div class="d-grid mt-4">
-                                <button type="submit" class="btn btn-success btn-lg">Sign Up</button>
-                            </div>
-                        </form>
-
-                    </div>
-                </div>
-            </div>
+<body>
+  <div class="container">
+    <div class="form-title">Registration</div>
+    <div id="response_msg" class="alert d-none" role="alert"></div>
+    <form id="sign_up" action="#" method="post">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="username" class="form-label">Full Name</label>
+          <input type="text" id="username" name="username" class="form-control" required placeholder="Enter your full name">
+          <div id="error_username" class="error-msg"></div>
         </div>
-    </div>
+        <div class="col-md-6">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" id="email" name="email" class="form-control" required placeholder="Enter your email address">
+          <div id="error_email" class="error-msg"></div>
+        </div>
+        <div class="col-md-6">
+          <label for="phone" class="form-label">Phone</label>
+          <input type="number" id="phone" name="phone" class="form-control" required placeholder="Enter 10-digit mobile number">
+          <div id="error_phone" class="error-msg"></div>
+        </div>
+        <div class="col-md-6">
+          <label for="password_field" class="form-label">Password</label>
+          <input type="password" id="password_field" name="password" class="form-control" required placeholder="Create a password">
+          <div id="error_password" class="error-msg"></div>
+        </div>
+        <div class="col-md-6">
+          <label for="confirm_password" class="form-label">Confirm Password</label>
+          <input type="text" id="confirm_password" name="confirm_password" class="form-control" required placeholder="Re-enter your password">
+          <div id="error_confirm_password" class="error-msg"></div>
+        </div>
+        <div class="col-md-6">
+          <label for="otp" class="form-label">Enter OTP</label>
+          <div class="input-group">
+            <input type="text" id="otp" name="otp" class="form-control" required placeholder="Enter the OTP">
+            <button type="button" class="btn btn-outline-primary" onclick="validateFormForOtp()">Send OTP</button>
+          </div>
+          <div id="error_otp" class="error-msg"></div>
+        </div>
+        <div class="col-12">
+          <label class="form-label d-block">Gender</label>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" id="gender_male" name="gender" value="male" required>
+            <label class="form-check-label" for="gender_male">Male</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" id="gender_female" name="gender" value="female" required>
+            <label class="form-check-label" for="gender_female">Female</label>
+          </div>
+          <div id="error_gender" class="error-msg"></div>
+        </div>
+        <div class="col-12 mt-3">
+          <button type="submit" class="btn btn-primary w-100">Register</button>
+        </div>
+      </div>
+    </form>
 
-</body>
-<script>
+  </div>
+  <?php $this->load->view('includes/foot'); ?>
+  <script>
+    var USER_REQUESTED_FOR_OTP = false;
+
+    function fadeOutErrors() {
+      setTimeout(() => {
+        $('.error-msg').fadeOut();
+      }, 5000);
+    }
+
+    function validateForm() {
+      let valid = true;
+      $('.error-msg').html('').show();
+
+      const username = $('#username').val().trim();
+      const email = $('#email').val().trim();
+      const phone = $('#phone').val().trim();
+      const password = $('#password_field').val().trim();
+      const confirmPassword = $('#confirm_password').val().trim();
+      const otp = $('#otp').val().trim();
+      const gender = $('input[name="gender"]:checked').val();
+
+      if (!username) {
+        $('#error_username').text('Full Name is required');
+        valid = false;
+      }
+      if (!email || !/^[\w.-]+@[\w.-]+\.\w+$/.test(email)) {
+        $('#error_email').text('Valid email is required');
+        valid = false;
+      }
+      if (!/^[6-9][0-9]{9}$/.test(phone)) {
+        $('#error_phone').text('Valid phone number is required');
+        valid = false;
+      }
+      if (password.length < 6) {
+        $('#error_password').text('Password must be at least 6 characters');
+        valid = false;
+      }
+      if (password !== confirmPassword) {
+        $('#error_confirm_password').text('Passwords do not match');
+        valid = false;
+      }
+      if (!otp || otp.length !== 6) {
+        $('#error_otp').text('OTP must be 6 digits');
+        valid = false;
+      }
+      if (!gender) {
+        $('#error_gender').text('Gender is required');
+        valid = false;
+      }
+
+      fadeOutErrors();
+      return valid;
+    }
+
+    function handleResponse(status, message) {
+      console.log(status, message);
+      const msgBox = $('#response_msg');
+
+      msgBox.removeClass('d-none alert-success alert-danger').html('');
+
+      if (status === true) {
+        msgBox.addClass('alert alert-success').html(message);
+      } else {
+        msgBox.addClass('alert alert-danger').html(message || 'Something went wrong');
+      }
+      msgBox.show(); // Ensure the box is visible
+
+      setTimeout(() => msgBox.fadeOut(), 4000); // Then fade it out
+    }
+
+
+    function validateFormForOtp() {
+      const email = $('#email').val().trim();
+      $('#error_email').text('').show();
+      if (!email || !/^[\w.-]+@[\w.-]+\.\w+$/.test(email)) {
+        $('#error_email').text('Enter a valid email before requesting OTP');
+        fadeOutErrors();
+        return;
+      }
+      const url = "<?= site_url('user/send_login_otp'); ?>";
+      var fData = new FormData();
+      fData.append('email', email);
+      submit_form_data_ajax(url, fData, function(data) {
+        const response = JSON.parse(data)
+        handleResponse(response.status, response.message);
+        if (response.status) USER_REQUESTED_FOR_OTP = true;
+      });
+    }
+
     $('#sign_up').submit(function(e) {
-        e.preventDefault();
-        const fdata = new FormData($(this)[0]);
-        $.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: fdata,
-            contentType: false, 
-            processData: false, 
-            success: function(response) {
-                let res = JSON.parse(response);
-                // Clear old errors
-                $('.error-msg').html('');
-
-                if (res.status) {
-                    $('body').html(res.html); // Load OTP form
-                } else {
-                    if (res.errors) {
-                        for (let field in res.errors) {
-                            if (res.errors[field]) {
-                                $('#error_' + field).html(res.errors[field]);
-                            }
-                        }
-                    }
-                }
+      e.preventDefault();
+      if (!validateForm()) {
+        $('#response_msg')
+          .removeClass('d-none')
+          .addClass('alert alert-danger')
+          .html('Please fix the form errors before submitting.');
+        setTimeout(() => $('#response_msg').fadeOut(), 5000);
+        error_otp
+        return;
+      }
+      if (!USER_REQUESTED_FOR_OTP) {
+        $('#error_otp').html("Please request for a otp before register.");
+        setTimeout(() => {
+          $('#error_otp').fadeOut(3000)
+        }, 300);
+        return;
+      }
+      const url = window.location.href;
+      const fData = new FormData($('#sign_up')[0]);
+      submit_form_data_ajax(url, fData, function(data) {
+        var response = JSON.parse(data);
+        // Show field-specific errors BEFORE calling handleResponse
+        if (response.status === false && response.errors) {
+          $.each(response.errors, function(field, msg) {
+            const errorDiv = $('#error_' + field);
+            if (errorDiv.length) {
+              errorDiv.text(msg).fadeIn();
+              setTimeout(() => errorDiv.fadeOut(), 5000);
             }
+          });
+        }
 
-        })
-    })
-</script>
+        // Call your existing handleResponse as-is
+        handleResponse(response.status, response.message);
+
+        // Redirect if successful
+        if (response.status === true) {
+          setTimeout(() => {
+            window.location.href = "<?= site_url('login'); ?>";
+          }, 3000);
+        }
+      });
+
+    });
+  </script>
+</body>
 
 </html>
