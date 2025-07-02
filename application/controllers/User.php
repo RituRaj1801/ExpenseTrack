@@ -18,7 +18,7 @@ class User extends CI_Controller
     {
         $prefix = "USR";
         $timestamp = time();
-        $lastChar = substr($user_name, 0, 1);
+        $lastChar = strtoupper(substr($user_name, 0, 1));
         $numbers = rand(100, 999);
         return $prefix . $timestamp . $numbers . $lastChar;
     }
@@ -240,16 +240,15 @@ class User extends CI_Controller
                     $RES = ['status' => true, 'status_code' => 200, 'message' => '✅ Login successful.',];
                     $session_data_array = [
                         "user_id" => $user['data']['user_id'],
-                        "username" => $user['data']['user_name'],
-                        "email" => $user['data']['user_email'],
-                        "phone" => $user['data']['user_phone'],
-                        "ip_address" => $_SERVER['REMOTE_ADDR'],
-
+                        // "username" => $user['data']['user_name'],
+                        // "email" => $user['data']['user_email'],
+                        // "phone" => $user['data']['user_phone'],
+                        // "ip_address" => $_SERVER['REMOTE_ADDR'],
                     ];
                     $session_data_raw = json_encode($session_data_array);
                     $encrypted_session_data = $this->encryption->encrypt($session_data_raw);
                     $this->input->set_cookie([
-                        'name'   => 'session_id',
+                        'name'   => 'USER_ACTIVITY',
                         'value'  => $encrypted_session_data,
                         'expire' => 60 * 60 * 24 * 365, // 5 minutes
                         'path'   => '/',
@@ -270,8 +269,18 @@ class User extends CI_Controller
 
     public function homepage()
     {
-        if (isset($_COOKIE['session_id']) && !empty($_COOKIE['session_id'])) {
-            $this->load->view('pages/user/homepage');
+        if (isset($_COOKIE['USER_ACTIVITY']) && !empty($_COOKIE['USER_ACTIVITY'])) {
+            $session_data_raw = $this->encryption->decrypt($_COOKIE['USER_ACTIVITY']);
+            $session_data = json_decode($session_data_raw, true);
+            if (isset($session_data['user_id']) && !empty($session_data['user_id'])) {
+                $user_data = $this->db->select('*')->from('users')->where('user_id', $session_data['user_id'])->get()->row_array();
+                if ($user_data) {
+                    $data['user_data'] = $user_data;
+                    // echo "<pre>";
+                    // echo json_encode($data);die;
+                    $this->load->view('pages/user/homepage', $data);
+                } else redirect('login');
+            } else redirect('login');
         } else redirect('login');
     }
 }
