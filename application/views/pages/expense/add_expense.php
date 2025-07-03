@@ -152,6 +152,12 @@
                         }
 
                         box.fadeIn();
+
+                        // ✅ Auto-fade the message after 3 seconds
+                        setTimeout(() => {
+                            box.fadeOut();
+                        }, 3000);
+
                     } catch (err) {
                         $('#responseBox')
                             .removeClass('alert-success')

@@ -5,7 +5,8 @@ class Expense extends CI_Controller
 {
     private $USER_LOGGED_IN = FALSE;
     private $USER_ID;
-
+    public $encryption;
+    public $form_validation ;
     public function __construct()
     {
         parent::__construct();
