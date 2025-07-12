@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,7 +12,11 @@
       --color: #ffffff;
       --primary-color: #0f3460;
     }
-    html { scroll-behavior: smooth; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       box-sizing: border-box;
@@ -21,18 +26,28 @@
       letter-spacing: 1px;
       transition: background 0.2s ease;
     }
-    a { text-decoration: none; color: var(--color); }
-    h1 { font-size: 2.5rem; }
+
+    a {
+      text-decoration: none;
+      color: var(--color);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+    }
+
     .container {
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
+
     .login-container {
       position: relative;
       width: 22.2rem;
     }
+
     .form-container {
       border: 1px solid hsla(0, 0%, 65%, 0.158);
       box-shadow: 0 0 36px 1px rgba(0, 0, 0, 0.2);
@@ -41,6 +56,7 @@
       z-index: 99;
       padding: 2rem;
     }
+
     .login-container form input {
       display: block;
       padding: 14.5px;
@@ -55,10 +71,12 @@
       letter-spacing: 0.8px;
       font-size: 15px;
     }
+
     .login-container form input:focus {
       box-shadow: 0 0 16px 1px rgba(0, 0, 0, 0.2);
       animation: wobble 0.3s ease-in;
     }
+
     .login-container form button {
       background-color: var(--primary-color);
       color: white;
@@ -72,10 +90,12 @@
       margin: 1.5rem 0;
       border: none;
     }
+
     .login-container form button:hover {
       box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.15);
       transform: scale(1.02);
     }
+
     .circle {
       width: 8rem;
       height: 8rem;
@@ -83,6 +103,7 @@
       border-radius: 50%;
       position: absolute;
     }
+
     .illustration {
       position: absolute;
       top: -14%;
@@ -90,42 +111,64 @@
       right: -2px;
       width: 90%;
     }
+
     .circle-one {
       top: 0;
       left: 0;
       z-index: -1;
       transform: translate(-45%, -45%);
     }
+
     .circle-two {
       bottom: 0;
       right: 0;
       z-index: -1;
       transform: translate(45%, 45%);
     }
+
     .register-forget {
       margin: 1rem 0;
       display: flex;
       justify-content: space-between;
     }
-    .opacity { opacity: 0.6; }
+
+    .opacity {
+      opacity: 0.6;
+    }
+
     .theme-btn-container {
       position: absolute;
       left: 0;
       bottom: 2rem;
     }
+
     .theme-btn {
       cursor: pointer;
       transition: all 0.3s ease-in;
     }
+
     .theme-btn:hover {
       width: 40px !important;
     }
+
     @keyframes wobble {
-      0% { transform: scale(1.025); }
-      25% { transform: scale(1); }
-      75% { transform: scale(1.025); }
-      100% { transform: scale(1); }
+      0% {
+        transform: scale(1.025);
+      }
+
+      25% {
+        transform: scale(1);
+      }
+
+      75% {
+        transform: scale(1.025);
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
+
     .form-text {
       font-size: 13px;
       margin-bottom: 10px;
@@ -133,11 +176,21 @@
       opacity: 0;
       transition: opacity 0.3s ease;
     }
-    .text-danger { color: #ff6b6b; }
-    .text-success { color: #4cd137; }
-    .form-text.show { opacity: 1; }
+
+    .text-danger {
+      color: #ff6b6b;
+    }
+
+    .text-success {
+      color: #4cd137;
+    }
+
+    .form-text.show {
+      opacity: 1;
+    }
   </style>
 </head>
+
 <body>
   <section class="container">
     <div class="login-container">
@@ -145,7 +198,7 @@
       <div class="form-container">
         <img src="https://raw.githubusercontent.com/hicodersofficial/glassmorphism-login-form/master/assets/illustration.png" alt="illustration" class="illustration" />
         <h1 class="opacity">LOGIN</h1>
-        <form id="login_form" action="<?= site_url('user/user_login'); ?>" novalidate>
+        <form id="login_form" action="<?= site_url('login'); ?>" novalidate>
           <input name="user_email" type="email" placeholder="EMAIL" />
           <small id="email_error" class="form-text text-danger"></small>
 
@@ -168,13 +221,36 @@
   </section>
 
   <script>
-    const themes = [
-      { background: "#1A1A2E", color: "#FFFFFF", primaryColor: "#0F3460" },
-      { background: "#461220", color: "#FFFFFF", primaryColor: "#E94560" },
-      { background: "#192A51", color: "#FFFFFF", primaryColor: "#967AA1" },
-      { background: "#F7B267", color: "#000000", primaryColor: "#F4845F" },
-      { background: "#F25F5C", color: "#000000", primaryColor: "#642B36" },
-      { background: "#231F20", color: "#FFF", primaryColor: "#BB4430" }
+    const themes = [{
+        background: "#1A1A2E",
+        color: "#FFFFFF",
+        primaryColor: "#0F3460"
+      },
+      {
+        background: "#461220",
+        color: "#FFFFFF",
+        primaryColor: "#E94560"
+      },
+      {
+        background: "#192A51",
+        color: "#FFFFFF",
+        primaryColor: "#967AA1"
+      },
+      {
+        background: "#F7B267",
+        color: "#000000",
+        primaryColor: "#F4845F"
+      },
+      {
+        background: "#F25F5C",
+        color: "#000000",
+        primaryColor: "#642B36"
+      },
+      {
+        background: "#231F20",
+        color: "#FFF",
+        primaryColor: "#BB4430"
+      }
     ];
 
     const setTheme = (theme) => {
@@ -199,8 +275,8 @@
   </script>
 
   <script>
-    $(document).ready(function () {
-      $('#login_form').submit(function (e) {
+    $(document).ready(function() {
+      $('#login_form').submit(function(e) {
         e.preventDefault();
 
         let email = $('input[name="user_email"]').val().trim();
@@ -241,7 +317,7 @@
             processData: false,
             contentType: false,
             cache: false,
-            success: function (response) {
+            success: function(response) {
               try {
                 const res = typeof response === 'object' ? response : JSON.parse(response);
                 $('#response_msg').text(res.message).fadeIn();
@@ -270,7 +346,7 @@
                   .fadeIn();
               }
             },
-            error: function () {
+            error: function() {
               $('#response_msg')
                 .text('Server error. Please try again later.')
                 .addClass('text-danger show')
@@ -282,4 +358,5 @@
     });
   </script>
 </body>
+
 </html>

@@ -83,7 +83,7 @@
         </div>
         <div class="col-md-6">
           <label for="confirm_password" class="form-label">Confirm Password</label>
-          <input type="password" id="confirm_password" name="confirm_password" class="form-control" required placeholder="Re-enter your password" autocomplete="off">
+          <input type="text" id="confirm_password" name="confirm_password" class="form-control" required placeholder="Re-enter your password" autocomplete="off">
           <div id="error_confirm_password" class="error-msg"></div>
         </div>
         <div class="col-md-6">
