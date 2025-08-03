@@ -292,9 +292,14 @@ class User extends CI_Controller
                             "expiry" => 300
                         ];
                         $this->_encrypt_session_data($enc_data);
-                        $this->Email_model->send_otp($email, $otp);
+                        $forget_password_data = [
+                            "APP_NAME" => "ExpenseTrack",
+                            "USER_NAME" => $user['data']['user_name'],
+                            "OTP_CODE" => $otp
+                        ];
+                        $this->Email_model->send_otp(["email" => $email, "data" => $forget_password_data, "template_id" => "forget_password_otp"]);
                         $RES = ['status' => true, 'status_code' => 200, 'message' => '✅ OTP sent successfully.',];
-                    } else $RES = ['status' => false, 'status_code' => 400, 'status_key' => "EMAIL_NOT_FOUND", 'message' => "Invalid action type."];
+                    } else $RES = ['status' => false, 'status_code' => 400, 'status_key' => "EMAIL_NOT_FOUND", 'message' => "Email not found."];
                 } else $RES = ['status' => false, 'status_code' => 400, 'status_key' => "INVALID_EMAIL", 'message' => "Invalid action type."];
             } else if ($action === "verify_otp") {
                 if (isset($_COOKIE['FORGET_ACCOUNT_PASSWORD']) && !empty($_COOKIE['FORGET_ACCOUNT_PASSWORD'])) {
@@ -308,7 +313,7 @@ class User extends CI_Controller
                         $new_password = $input_data['new_password'] ?? "";
                         $cnf_new_password = $input_data['cnf_new_password'] ?? "";
                         if ($session_email === $email) {
-                            if ($session_otp === $otp) {
+                            if ($session_otp == $otp) {
                                 if (strlen(trim($new_password)) >= 6) {
                                     if ($new_password === $cnf_new_password) {
                                         $update_data = [
@@ -325,7 +330,7 @@ class User extends CI_Controller
             } else $RES = ['status' => false, 'status_code' => 400, 'status_key' => "INVALID_ACTION_TYPE", 'message' => "Invalid action type."];
             echo json_encode($RES);
             exit();
-        }
+        } else $this->load->view("pages/user/forget_password");
     }
 
 

@@ -109,6 +109,9 @@
         <div class="col-12 mt-3">
           <button type="submit" class="btn btn-primary w-100">Register</button>
         </div>
+        <div class="col-12 mt-3">
+          <a href="<?php echo site_url('login')?>"> <button type="button" class="btn btn-primary w-100">Login</button></a>
+        </div>
       </div>
     </form>
 

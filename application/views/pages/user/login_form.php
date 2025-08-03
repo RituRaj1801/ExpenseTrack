@@ -188,6 +188,26 @@
     .form-text.show {
       opacity: 1;
     }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-wrapper input {
+      padding-right: 40px;
+      /* space for the icon */
+    }
+
+    .password-toggle {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 1.1rem;
+      color: var(--color);
+      opacity: 0.7;
+    }
   </style>
 </head>
 
@@ -202,7 +222,11 @@
           <input name="user_email" type="email" placeholder="EMAIL" />
           <small id="email_error" class="form-text text-danger"></small>
 
-          <input name="password" type="password" placeholder="PASSWORD" />
+          <div class="password-wrapper">
+            <input name="password" type="password" id="password" placeholder="PASSWORD" />
+            <span class="password-toggle" onclick="togglePassword()">👁️</span>
+          </div>
+
           <small id="password_error" class="form-text text-danger"></small>
 
           <small id="response_msg" class="form-text text-danger" style="margin-top: 10px; display: none;"></small>
@@ -212,7 +236,7 @@
 
         <div class="register-forget opacity">
           <a href="<?= site_url('signup') ?>">REGISTER</a>
-          <a href="#">FORGOT PASSWORD</a>
+          <a href="<?php echo site_url('forget_password') ?>">FORGOT PASSWORD</a>
         </div>
       </div>
       <div class="circle circle-two"></div>
@@ -357,6 +381,17 @@
       });
     });
   </script>
+  <script>
+    function togglePassword() {
+      const passwordInput = document.getElementById('password');
+      const toggleIcon = document.querySelector('.password-toggle');
+      const isVisible = passwordInput.type === 'text';
+
+      passwordInput.type = isVisible ? 'password' : 'text';
+      toggleIcon.textContent = isVisible ? '👁️' : '🙈';
+    }
+  </script>
+
 </body>
 
 </html>
