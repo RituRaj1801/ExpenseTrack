@@ -47,12 +47,13 @@
 
         <!-- Expense Table -->
         <div id="expenseTable">
-            <table class="table table-bordered table-striped table-hover">
+            <table class="table table-bordered table-hover">
                 <thead class="table-dark">
                     <tr>
                         <th>ID</th>
                         <th>Amount</th>
                         <th>Description</th>
+                        <th>Txn Type</th>
                         <th>Category</th>
                         <th>Date</th>
                     </tr>
@@ -128,4 +129,5 @@
         });
     </script>
 </body>
+
 </html>

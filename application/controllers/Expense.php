@@ -6,7 +6,7 @@ class Expense extends CI_Controller
     private $USER_LOGGED_IN = FALSE;
     private $USER_ID;
     public $encryption;
-    public $form_validation ;
+    public $form_validation;
     public function __construct()
     {
         parent::__construct();
@@ -29,6 +29,7 @@ class Expense extends CI_Controller
                 $this->form_validation->set_rules('amount', 'Amount', 'required|numeric|greater_than[0]');
                 $this->form_validation->set_rules('description', 'Description', 'required|min_length[2]|max_length[255]');
                 $this->form_validation->set_rules('category', 'Category', 'required');
+                $this->form_validation->set_rules('txn_type', 'Transaction Type', 'required|in_list[credit,debit]');
                 if ($this->form_validation->run() == FALSE) {
                     // Return validation errors (for AJAX)
                     echo json_encode([
@@ -43,9 +44,11 @@ class Expense extends CI_Controller
                 $amount = $this->input->post('amount');
                 $description = $this->input->post('description');
                 $category = $this->input->post('category');
+                $txn_type = $this->input->post('txn_type');
                 $inserted_data = [
                     'user_id' => $this->USER_ID,
                     'amount' => $amount,
+                    'txn_type' => $txn_type,
                     'description' => $description,
                     'category' => $category
                 ];
@@ -71,6 +74,7 @@ class Expense extends CI_Controller
             if (!empty($post_params['category'])) {
                 $this->db->where('category', $post_params['category']);
             }
+            $this->db->where("created_at >=", date('Y-m-01'))->where("created_at <=", date('Y-m-t'));
             $expense = $this->db->get()->result_array();
 
             $expenseTable = '';
@@ -78,21 +82,33 @@ class Expense extends CI_Controller
             if (!empty($expense)) {
                 foreach ($expense as $key => $value) {
                     $total_amount += $value['amount'];
-                    $expenseTable .= '<tr>
+
+                    // Set row color class based on txn_type
+                    $rowClass = '';
+                    if ($value['txn_type'] === 'credit') {
+                        $rowClass = 'table-info'; // Bright green
+                    } elseif ($value['txn_type'] === 'debit') {
+                        $rowClass = 'table-warning'; // Yellowish
+                    }
+
+                    $expenseTable .= '<tr class="' . $rowClass . '">
                         <td>' . ($key + 1) . '</td>
                         <td>' . $value['amount'] . '</td>
                         <td>' . $value['description'] . '</td>
+                        <td>' . $value['txn_type'] . '</td>
                         <td>' . $value['category'] . '</td>
                         <td>' . $value['created_at'] . '</td>
                     </tr>';
                 }
+
                 $expenseTable .= '<tr class="table-success fw-bold">
-                    <td colspan="2">Total</td>
+                    <td colspan="3">Total</td>
                     <td colspan="3">' . number_format($total_amount, 2) . '</td>
                 </tr>';
             } else {
-                $expenseTable .= '<tr><td colspan="5">No expense found</td></tr>';
+                $expenseTable .= '<tr><td colspan="8">No expense found</td></tr>';
             }
+
             $data['expenseTable'] = $expenseTable;
 
             // Category Summary

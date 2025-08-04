@@ -65,6 +65,13 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="txn_type" class="form-label">Transaction Type</label>
+                    <select name="txn_type" class="form-select" required>
+                        <option value="debit">Debit</option>
+                        <option value="credit">Credit</option>
+                    </select>
+                </div>
+                <div class="mb-3">
                     <label for="category" class="form-label">Category</label>
                     <select name="category" class="form-select" required>
                         <option value="" selected disabled>-- Select Category --</option>

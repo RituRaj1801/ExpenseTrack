@@ -248,8 +248,15 @@ class User extends CI_Controller
 
             echo json_encode($RES);
             exit();
+        } else {
+            if (isset($_COOKIE['USER_ACTIVITY']) && !empty($_COOKIE['USER_ACTIVITY'])) {
+                $session_data_raw = $this->encryption->decrypt($_COOKIE['USER_ACTIVITY']);
+                $session_data = json_decode($session_data_raw, true);
+                if (isset($session_data['user_id']) && !empty($session_data['user_id'])) {
+                    redirect('homepage');
+                } else $this->load->view('pages/user/login_form');
+            } else $this->load->view('pages/user/login_form');
         }
-        $this->load->view('pages/user/login_form');
     }
     /* LOGIN FORM */
 
