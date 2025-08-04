@@ -68,13 +68,33 @@ class Expense extends CI_Controller
         if ($this->USER_LOGGED_IN) {
             $user_id = $this->USER_ID;
             $post_params = get_all_input_data();
+            $month_array = [
+                '01' => 'January',
+                '02' => 'February',
+                '03' => 'March',
+                '04' => 'April',
+                '05' => 'May',
+                '06' => 'June',
+                '07' => 'July',
+                '08' => 'August',
+                '09' => 'September',
+                '10' => 'October',
+                '11' => 'November',
+                '12' => 'December',
+            ];
 
             // Fetch Expenses
             $this->db->select('*')->from('expense')->where('user_id', $user_id);
             if (!empty($post_params['category'])) {
                 $this->db->where('category', $post_params['category']);
             }
-            $this->db->where("created_at >=", date('Y-m-01'))->where("created_at <=", date('Y-m-t'));
+            if (isset($_GET['month']) && !empty($_GET['month']) && isset($month_array[$_GET['month']])) {
+                $currentMonth = $_GET['month'];
+                $this->db->where("created_at >=", date('Y-' . $_GET['month'] . '-01'))->where("created_at <=", date('Y-' . $_GET['month'] . '-t'));
+            } else {
+                $currentMonth = date('m');
+                $this->db->where("created_at >=", date('Y-m-01'))->where("created_at <=", date('Y-m-t'));
+            }
             $expense = $this->db->get()->result_array();
 
             $expenseTable = '';
@@ -106,7 +126,7 @@ class Expense extends CI_Controller
                     <td colspan="3">' . number_format($total_amount, 2) . '</td>
                 </tr>';
             } else {
-                $expenseTable .= '<tr><td colspan="8">No expense found</td></tr>';
+                $expenseTable .= '<tr><td class="text-center" colspan="8">No expense found</td></tr>';
             }
 
             $data['expenseTable'] = $expenseTable;
@@ -114,8 +134,13 @@ class Expense extends CI_Controller
             // Category Summary
             $this->db->select('category, SUM(amount) as total_amount')
                 ->from('expense')
-                ->where('user_id', $user_id)
-                ->group_by('category');
+                ->where('user_id', $user_id);
+            if (isset($_GET['month']) && !empty($_GET['month']) && isset($month_array[$_GET['month']])) {
+                $this->db->where("created_at >=", date('Y-' . $_GET['month'] . '-01'))->where("created_at <=", date('Y-' . $_GET['month'] . '-t'));
+            } else {
+                $this->db->where("created_at >=", date('Y-m-01'))->where("created_at <=", date('Y-m-t'));
+            }
+            $this->db->group_by('category');
             $category_summary = $this->db->get()->result_array();
 
             $categoryTable = '';
@@ -131,7 +156,8 @@ class Expense extends CI_Controller
             }
             $data['categoryTable'] = $categoryTable;
             $data['chart_data'] = json_encode($category_summary);
-
+            $data['month_array'] = $month_array;
+            $data['currentMonth'] = $currentMonth;
             $this->load->view('pages/expense/show_expense', $data);
         } else {
             redirect('login');

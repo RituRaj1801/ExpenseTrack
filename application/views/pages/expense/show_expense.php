@@ -42,8 +42,20 @@
         <h2 class="text-center mb-4">Expense Records</h2>
 
         <div class="mb-4 text-end">
-            <a href="<?= base_url('homepage') ?>" class="btn btn-primary">← Back to Home</a>
+            <form method="GET" action="<?= current_url() ?>" class="d-inline-block">
+                <div class="input-group">
+                    <select class="form-select" name="month" id="month" onchange="this.form.submit()">
+                        <?php foreach ($month_array as $month_number => $month_name) { ?>
+                            <option value="<?= $month_number ?>" <?= ($month_number === $currentMonth) ? 'selected' : '' ?>>
+                                <?= $month_name ?>
+                            </option>
+                        <?php } ?>
+                    </select>
+                </div>
+            </form>
+            <a href="<?= base_url('homepage') ?>" class="btn btn-primary ms-2">← Back to Home</a>
         </div>
+
 
         <!-- Expense Table -->
         <div id="expenseTable">
