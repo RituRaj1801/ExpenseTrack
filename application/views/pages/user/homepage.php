@@ -109,6 +109,9 @@
               <li><a class="dropdown-item" href="#trendMessage"><i class="bi bi-graph-up-arrow me-2"></i>Spending Trends</a></li>
             </ul>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="<?php site_url("contact") ?>">Contact Us</a>
+          </li>
 
           <li class="nav-item">
             <a class="nav-link text-danger" href="#"><i class="bi bi-box-arrow-right me-1"></i> Logout</a>

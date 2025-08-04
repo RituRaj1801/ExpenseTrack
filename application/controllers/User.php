@@ -332,6 +332,11 @@ class User extends CI_Controller
             exit();
         } else $this->load->view("pages/user/forget_password");
     }
+    public function contact()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        } else $this->load->view("pages/user/contact");
+    }
 
 
     private function _encrypt_session_data($params)
