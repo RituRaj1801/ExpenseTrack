@@ -270,6 +270,16 @@ class User extends CI_Controller
                 $user_data = $this->db->select('*')->from('users')->where('user_id', $session_data['user_id'])->get()->row_array();
                 if ($user_data) {
                     $data['user_data'] = $user_data;
+                    $data['total_spend'] = $this->db->select_sum('amount')
+                        ->from('expense')
+                        ->where(
+                            [
+                                'user_id' => $session_data['user_id'],
+                                "txn_type" => "debit",
+                                "created_at >=" => date('Y-m-01'),
+                                "created_at <=" => date('Y-m-t')
+                            ]
+                        )->get()->row_array();
                     // echo "<pre>";
                     // echo json_encode($data);die;
                     $this->load->view('pages/user/homepage', $data);

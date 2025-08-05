@@ -203,10 +203,10 @@
   </div>
 
   <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
       var forget_password_url = '<?php echo site_url('forget_password') ?>';
 
-      $('#sendOtpBtn').click(function () {
+      $('#sendOtpBtn').click(function() {
         let email = $('#email').val().trim();
         $('#email_error').removeClass('show').text('');
         $('#response_msg').stop(true, true).hide().removeClass('text-success text-danger show');
@@ -217,13 +217,13 @@
           $.post(forget_password_url, {
             email: email,
             action: 'send_otp'
-          }, function (res) {
+          }, function(res) {
             let response = typeof res === 'object' ? res : JSON.parse(res);
             $('#response_msg')
               .text(response.message)
               .removeClass('text-danger text-success')
               .addClass(response.status ? 'text-success' : 'text-danger')
-              .fadeIn(300, function () {
+              .fadeIn(300, function() {
                 setTimeout(() => {
                   $('#response_msg').fadeOut(500);
                 }, 4000);
@@ -232,7 +232,7 @@
         }
       });
 
-      $('#forgot_form').submit(function (e) {
+      $('#forgot_form').submit(function(e) {
         e.preventDefault();
 
         let email = $('#email').val().trim();
@@ -270,7 +270,7 @@
               cnf_new_password: confirmPass,
               action: 'verify_otp'
             },
-            success: function (res) {
+            success: function(res) {
               const response = typeof res === 'object' ? res : JSON.parse(res);
               $('#response_msg')
                 .text(response.message)
@@ -284,7 +284,7 @@
                 }, 2000);
               }
             },
-            error: function () {
+            error: function() {
               $('#response_msg')
                 .text('Server error. Please try again later.')
                 .addClass('text-danger show');

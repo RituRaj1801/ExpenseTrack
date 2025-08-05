@@ -61,4 +61,5 @@ $route['contact'] = 'user/contact';
 /* user related routes */
 
 $route['homepage'] = 'user/homepage';
+$route['add_expense'] = 'expense/add_expense';
 $route['show_expense'] = 'expense/show_expense';

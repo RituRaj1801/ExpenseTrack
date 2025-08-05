@@ -1,45 +1,10 @@
+<!-- index.php -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>User Home - Expense Track</title>
-
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <!-- Bootstrap Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
-
+  <?php $this->load->view('include/head'); ?>
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f8f9fa;
-    }
-
-    .navbar {
-      background-color: #2c3e50;
-    }
-
-    .navbar-brand {
-      font-weight: 700;
-      font-size: 1.6rem;
-      color: #fff !important;
-    }
-
-    .nav-link {
-      color: #ddd !important;
-    }
-
-    .nav-link:hover,
-    .nav-link.active {
-      color: #fff !important;
-      background-color: #34495e;
-      border-radius: 6px;
-    }
-
     .feature-card {
       background: #fff;
       border-radius: 12px;
@@ -69,73 +34,25 @@
       color: #fff;
       font-size: 1.8rem;
     }
-
-    footer {
-      background-color: #2c3e50;
-      color: #ccc;
-      text-align: center;
-      padding: 20px 0;
-      margin-top: 60px;
-    }
   </style>
 </head>
 
 <body>
-
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
-    <div class="container">
-      <a class="navbar-brand" href="#">ExpenseTrack</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-        <ul class="navbar-nav align-items-center">
-          <li class="nav-item">
-            <a class="nav-link active" href="#">Home</a>
-          </li>
-
-          <!-- Features Dropdown -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="featuresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Features
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="featuresDropdown">
-              <li><a class="dropdown-item" href="<?= site_url('expense/add_expense'); ?>"><i class="bi bi-plus-circle me-2"></i>Add Expense</a></li>
-              <li><a class="dropdown-item" href="<?= site_url('expense/show_expense'); ?>"><i class="bi bi-bar-chart me-2"></i>Show Expense</a></li>
-              <li><a class="dropdown-item" href="#monthlyTotal"><i class="bi bi-calendar3 me-2"></i>Monthly Summary</a></li>
-              <li><a class="dropdown-item" href="#budgetLeft"><i class="bi bi-wallet me-2"></i>Budget Tracker</a></li>
-              <li><a class="dropdown-item" href="#trendMessage"><i class="bi bi-graph-up-arrow me-2"></i>Spending Trends</a></li>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<?php site_url("contact") ?>">Contact Us</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link text-danger" href="#"><i class="bi bi-box-arrow-right me-1"></i> Logout</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <?php $this->load->view('include/header'); ?>
 
   <!-- Hero Section -->
   <section class="py-5 text-center bg-light">
     <div class="container">
-      <h1 class="display-5 fw-bold">Welcome, <?= ucfirst($user_data['user_name']) ?>!</h1>
+      <h1 class="display-5 fw-bold">Welcome, <?php echo $user_data['user_name'] ?? "User!"; ?></h1>
       <p class="lead">Your personalized dashboard to manage and track all your expenses easily.</p>
     </div>
   </section>
 
-  <!-- Features Section (Don't Remove) -->
-  <section id="features" class="py-5">
+  <!-- Features Section -->
+  <section id="features">
     <div class="container">
       <h2 class="text-center mb-5">Smart Tools to Manage Your Expenses</h2>
       <div class="row g-4 justify-content-center">
-
-        <!-- Add Expense -->
         <div class="col-md-6 col-lg-4">
           <a href="<?= site_url('expense/add_expense'); ?>">
             <div class="feature-card">
@@ -145,8 +62,6 @@
             </div>
           </a>
         </div>
-
-        <!-- View Expense -->
         <div class="col-md-6 col-lg-4">
           <a href="<?= site_url('expense/show_expense'); ?>">
             <div class="feature-card">
@@ -156,53 +71,20 @@
             </div>
           </a>
         </div>
-
-        <!-- Monthly Summary -->
         <div class="col-md-6 col-lg-4">
           <div class="feature-card">
             <div class="icon-wrapper"><i class="bi bi-calendar3"></i></div>
             <h4>Monthly Summary</h4>
-            <p><strong>Total Expenses:</strong> ₹<span id="monthlyTotal">Loading...</span><br>
-              <small>This value will be loaded from backend.</small>
+            <p><strong>Total Expenses:</strong> ₹<span id="monthlyTotal"><?php echo $total_spend['amount'] ?? 0 ?></span><br>
+              <!-- <small>This value will be loaded from backend.</small> -->
             </p>
           </div>
         </div>
-
-        <!-- Budget Tracker -->
-        <div class="col-md-6 col-lg-4">
-          <div class="feature-card">
-            <div class="icon-wrapper"><i class="bi bi-wallet-fill"></i></div>
-            <h4>Budget Tracker</h4>
-            <p><strong>Remaining Budget:</strong> ₹<span id="budgetLeft">--</span><br>
-              <small>Based on your set budget and current expenses.</small>
-            </p>
-          </div>
-        </div>
-
-        <!-- Trends -->
-        <div class="col-md-6 col-lg-4">
-          <div class="feature-card">
-            <div class="icon-wrapper"><i class="bi bi-graph-up-arrow"></i></div>
-            <h4>Spending Trends</h4>
-            <p><span id="trendMessage">Analyzing your habits...</span><br>
-              <small>Insight will appear here once data is available.</small>
-            </p>
-          </div>
-        </div>
-
       </div>
     </div>
   </section>
-
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <p>&copy; 2025 ExpenseTrack. All rights reserved.</p>
-    </div>
-  </footer>
-
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <?php $this->load->view('include/footer'); ?>
+  <?php $this->load->view('include/foot'); ?>
 
 </body>
 
