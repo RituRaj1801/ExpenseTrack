@@ -16,6 +16,12 @@
         background: #f8f9fa;
     }
 
+    .top-nav{
+        position: sticky;
+        top: 0px;
+        z-index: 20;
+    }
+
     .navbar {
         background-color: #2c3e50;
     }
@@ -44,5 +50,4 @@
         padding: 20px 0;
         margin-top: 60px;
     }
-
 </style>

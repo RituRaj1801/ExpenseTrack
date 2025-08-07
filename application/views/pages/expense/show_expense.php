@@ -2,22 +2,14 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Expense Records</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <?php $this->load->view('include/head'); ?>
+
+    <!-- Bootstrap 4 -->
+    <!-- <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
-
-        .container {
-            background: #fff;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
         h2,
         h4 {
             color: #343a40;
@@ -33,32 +25,42 @@
             max-width: 600px;
             margin: 0 auto;
         }
+
+        #expenseTable thead th {
+            position: sticky;
+            top: 0;
+            background-color: #343a40;
+            color: white;
+            z-index: 2;
+        }
     </style>
 </head>
 
+
 <body>
+    <?php $this->load->view('include/header'); ?>
 
     <div class="container mt-5">
-        <h2 class="text-center mb-4">Expense Records</h2>
-
-        <div class="mb-4 text-end">
-            <form method="GET" action="<?= current_url() ?>" class="d-inline-block">
-                <div class="input-group">
-                    <select class="form-select" name="month" id="month" onchange="this.form.submit()">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+                Expense Records of
+                <form method="GET" action="<?= current_url() ?>" class="d-inline">
+                    <select class="form-control d-inline w-auto" name="month" id="month" onchange="this.form.submit()" style="display: inline-block;">
                         <?php foreach ($month_array as $month_number => $month_name) { ?>
                             <option value="<?= $month_number ?>" <?= ($month_number === $currentMonth) ? 'selected' : '' ?>>
                                 <?= $month_name ?>
                             </option>
                         <?php } ?>
                     </select>
-                </div>
-            </form>
-            <a href="<?= base_url('homepage') ?>" class="btn btn-primary ms-2">← Back to Home</a>
+                </form>
+            </h2>
         </div>
 
 
+
         <!-- Expense Table -->
-        <div id="expenseTable">
+        <div id="expenseTable" class="table-responsive" style="overflow-x: auto;">
+
             <table class="table table-bordered table-hover">
                 <thead class="table-dark">
                     <tr>
@@ -96,6 +98,9 @@
             <canvas id="expensePieChart"></canvas>
         </div>
     </div>
+
+    <?php $this->load->view('include/footer'); ?>
+    <?php $this->load->view('include/foot'); ?>
 
     <script>
         const chartData = <?= $chart_data ?>;

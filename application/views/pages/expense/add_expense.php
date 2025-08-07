@@ -2,21 +2,8 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Add Expense</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- ✅ Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- ✅ jQuery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-
+    <?php $this->load->view('include/head'); ?>
     <style>
-        body {
-            background: #f5f5f5;
-            padding-top: 60px;
-        }
-
         .form-container {
             max-width: 500px;
             margin: auto;
@@ -29,23 +16,11 @@
         #responseBox {
             display: none;
         }
-
-        #pageLoader {
-            position: fixed;
-            z-index: 9999;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            top: 0;
-            left: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
     </style>
 </head>
 
 <body>
+    <?php $this->load->view('include/header'); ?>
 
     <div class="container">
         <div class="form-container">
@@ -54,26 +29,27 @@
             <div id="responseBox" class="alert" role="alert"></div>
 
             <form id="add_expense" method="post">
-                <div class="mb-3">
-                    <label for="amount" class="form-label">Amount</label>
+                <div class="form-group">
+                    <label for="amount">Amount</label>
                     <input type="number" step="0.01" class="form-control" name="amount" required>
                 </div>
 
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
+                <div class="form-group">
+                    <label for="description">Description</label>
                     <input type="text" class="form-control" name="description" required>
                 </div>
 
-                <div class="mb-3">
-                    <label for="txn_type" class="form-label">Transaction Type</label>
-                    <select name="txn_type" class="form-select" required>
+                <div class="form-group">
+                    <label for="txn_type">Transaction Type</label>
+                    <select name="txn_type" class="form-control" required>
                         <option value="debit">Debit</option>
                         <option value="credit">Credit</option>
                     </select>
                 </div>
-                <div class="mb-3">
-                    <label for="category" class="form-label">Category</label>
-                    <select name="category" class="form-select" required>
+
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select name="category" class="form-control" required>
                         <option value="" selected disabled>-- Select Category --</option>
                         <option value="Travel">Travel</option>
                         <option value="Food">Food</option>
@@ -87,30 +63,26 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn btn-primary w-100">Add Expense</button>
+                <button type="submit" class="btn btn-primary btn-block">Add Expense</button>
             </form>
 
             <div class="mt-3 text-center">
-                <a href="<?= base_url('show_expense') ?>" class="btn btn-success w-100">Show Expense Details</a>
+                <a href="<?= base_url('show_expense') ?>" class="btn btn-success btn-block">Show Expense Details</a>
             </div>
         </div>
     </div>
 
-    <!-- Loader -->
-    <div id="pageLoader" style="display: none;">
-        <div class="spinner-border text-light" role="status" style="width: 4rem; height: 4rem;"></div>
-    </div>
-
+    <!-- ✅ Bootstrap 4 Scripts -->
+    <?php $this->load->view('include/footer'); ?>
+    <?php $this->load->view('include/foot'); ?>
     <script>
         $('#add_expense').on('submit', function(e) {
             e.preventDefault();
 
-            // Collect field values
             const amount = $('input[name="amount"]').val().trim();
             const description = $('input[name="description"]').val().trim();
             const category = $('select[name="category"]').val();
 
-            // Validate fields
             let errorMsg = '';
             if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
                 errorMsg += '<li>Amount must be a positive number.</li>';
@@ -128,62 +100,42 @@
                     .addClass('alert-danger')
                     .html(`<ul>${errorMsg}</ul>`)
                     .fadeIn();
-                return; // Stop the form from submitting
+                return;
             }
 
-            // All good, proceed with AJAX
             const formData = new FormData(this);
-            const url = "<?php echo current_url(); ?>";
+            const url = "<?= current_url(); ?>";
+            submit_form_data_ajax(url, formData, function(response) {
+                try {
+                    const res = JSON.parse(response);
+                    const box = $('#responseBox');
+                    box.removeClass('alert-success alert-danger');
 
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                beforeSend: function() {
-                    $('#pageLoader').show();
-                    $('#responseBox').hide();
-                },
-                success: function(response) {
-                    try {
-                        const res = JSON.parse(response);
-                        const box = $('#responseBox');
-                        box.removeClass('alert-success alert-danger');
-
-                        if (res.status) {
-                            box.addClass('alert-success').html(res.message);
-                            $('#add_expense')[0].reset();
-                        } else {
-                            box.addClass('alert-danger').html(res.message);
-                        }
-
-                        box.fadeIn();
-
-                        // ✅ Auto-fade the message after 3 seconds
-                        setTimeout(() => {
-                            box.fadeOut();
-                        }, 3000);
-
-                    } catch (err) {
-                        $('#responseBox')
-                            .removeClass('alert-success')
-                            .addClass('alert-danger')
-                            .html("Error parsing server response.")
-                            .fadeIn();
+                    if (res.status) {
+                        box.addClass('alert-success').html(res.message);
+                        $('#add_expense')[0].reset();
+                    } else {
+                        box.addClass('alert-danger').html(res.message);
                     }
-                },
-                error: function() {
+
+                    box.fadeIn();
+                    setTimeout(() => box.fadeOut(), 3000);
+                } catch (err) {
                     $('#responseBox')
                         .removeClass('alert-success')
                         .addClass('alert-danger')
-                        .html("Network error. Please try again.")
+                        .html("Error parsing server response.")
                         .fadeIn();
-                },
-                complete: function() {
-                    $('#pageLoader').hide();
                 }
+            }, function() {
+                $('#responseBox')
+                    .removeClass('alert-success')
+                    .addClass('alert-danger')
+                    .html("Network error. Please try again.")
+                    .fadeIn();
             });
+
+
         });
     </script>
 

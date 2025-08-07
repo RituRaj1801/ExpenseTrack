@@ -10,6 +10,7 @@ class Expense extends CI_Controller
     public function __construct()
     {
         parent::__construct();
+        date_default_timezone_set('Asia/Kolkata');
         if (isset($_COOKIE['USER_ACTIVITY']) && !empty($_COOKIE['USER_ACTIVITY'])) {
             $session_data_raw = $this->encryption->decrypt($_COOKIE['USER_ACTIVITY']);
             $session_data = json_decode($session_data_raw, true);
@@ -50,7 +51,8 @@ class Expense extends CI_Controller
                     'amount' => $amount,
                     'txn_type' => $txn_type,
                     'description' => $description,
-                    'category' => $category
+                    'category' => $category,
+                    "created_at" => date('Y-m-d H:i:s')
                 ];
                 $success = $this->db->insert('expense', $inserted_data);
                 if ($success) {
@@ -117,7 +119,7 @@ class Expense extends CI_Controller
                         <td>' . $value['description'] . '</td>
                         <td>' . $value['txn_type'] . '</td>
                         <td>' . $value['category'] . '</td>
-                        <td>' . $value['created_at'] . '</td>
+                        <td>' . date("d M Y, h:i A", strtotime($value['created_at'])) . '</td>
                     </tr>';
                 }
 
