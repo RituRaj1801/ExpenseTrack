@@ -122,11 +122,6 @@ class Expense extends CI_Controller
                         <td>' . date("d M Y, h:i A", strtotime($value['created_at'])) . '</td>
                     </tr>';
                 }
-
-                $expenseTable .= '<tr class="table-success fw-bold">
-                    <td colspan="3">Total</td>
-                    <td colspan="3">' . number_format($total_amount, 2) . '</td>
-                </tr>';
             } else {
                 $expenseTable .= '<tr><td class="text-center" colspan="8">No expense found</td></tr>';
             }
@@ -153,6 +148,10 @@ class Expense extends CI_Controller
                         <td>₹' . number_format($row['total_amount'], 2) . '</td>
                     </tr>';
                 }
+                $categoryTable .= '<tr class="table-success fw-bold">
+                    <td >Total</td>
+                    <td >' . number_format($total_amount, 2) . '</td>
+                </tr>';
             } else {
                 $categoryTable .= '<tr><td colspan="2" class="text-center">No data found.</td></tr>';
             }

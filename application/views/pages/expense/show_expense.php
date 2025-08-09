@@ -4,11 +4,6 @@
 <head>
     <?php $this->load->view('include/head'); ?>
 
-    <!-- Bootstrap 4 -->
-    <!-- <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
-
     <style>
         h2,
         h4 {
@@ -60,8 +55,8 @@
 
         <!-- Expense Table -->
         <div id="expenseTable" class="table-responsive" style="overflow-x: auto;">
+            <table id="myTable" class="table table-bordered table-hover">
 
-            <table class="table table-bordered table-hover">
                 <thead class="table-dark">
                     <tr>
                         <th>ID</th>
@@ -102,6 +97,23 @@
     <?php $this->load->view('include/footer'); ?>
     <?php $this->load->view('include/foot'); ?>
 
+    <script>
+        $(document).ready(function() {
+            $('#myTable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                lengthMenu: [
+                    [10, 25, 50, -1],
+                    [10, 25, 50, "All"]
+                ],
+                order: [
+                    [5, 'asc']
+                ]
+            });
+        })
+    </script>
     <script>
         const chartData = <?= $chart_data ?>;
 
