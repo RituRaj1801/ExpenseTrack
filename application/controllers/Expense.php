@@ -97,13 +97,14 @@ class Expense extends CI_Controller
                 $currentMonth = date('m');
                 $this->db->where("created_at >=", date('Y-m-01'))->where("created_at <=", date('Y-m-t'));
             }
-            $expense = $this->db->get()->result_array();
+            $expense = $this->db->order_by('created_at', 'DESC')->get()->result_array();
 
             $expenseTable = '';
             $total_amount = 0;
             if (!empty($expense)) {
                 foreach ($expense as $key => $value) {
-                    $total_amount += $value['amount'];
+                    if ($value['txn_type'] === 'debit')
+                        $total_amount += $value['amount'];
 
                     // Set row color class based on txn_type
                     $rowClass = '';
@@ -131,7 +132,8 @@ class Expense extends CI_Controller
             // Category Summary
             $this->db->select('category, SUM(amount) as total_amount')
                 ->from('expense')
-                ->where('user_id', $user_id);
+                ->where('user_id', $user_id)
+                ->where('txn_type', 'debit');
             if (isset($_GET['month']) && !empty($_GET['month']) && isset($month_array[$_GET['month']])) {
                 $this->db->where("created_at >=", date('Y-' . $_GET['month'] . '-01'))->where("created_at <=", date('Y-' . $_GET['month'] . '-t'));
             } else {

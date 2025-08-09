@@ -79,7 +79,7 @@
             <thead class="table-secondary">
                 <tr>
                     <th>Category</th>
-                    <th>Total Amount</th>
+                    <th>Total Amount(Debit Only)</th>
                 </tr>
             </thead>
             <tbody>
@@ -107,9 +107,6 @@
                 lengthMenu: [
                     [10, 25, 50, -1],
                     [10, 25, 50, "All"]
-                ],
-                order: [
-                    [5, 'asc']
                 ]
             });
         })
